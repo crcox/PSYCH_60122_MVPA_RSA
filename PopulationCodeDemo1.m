@@ -37,13 +37,8 @@ scatter(r(:),b(:),2000,rgb,'s','filled')
 xlim([-0.1,1.1]);
 ylim([-0.1,1.1]);
 
-%% Split RGB codes into "population codes"
-% This is a bit contrived, but we are going to take the red and blue
-% channels and split their information into 8
-x = (rand(100,3)-0.5)*2;
-y = (rand(100,3)-0.5)*2;
-X = [r(:) - sum(x,2),x,b(:)-sum(y,2),y];
-imagesc(X)
+%% Summarize RGB as a distance matrix
+% Let's imagine 
 
 D = pdist(rgb);
 
