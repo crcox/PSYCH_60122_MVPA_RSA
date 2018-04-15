@@ -17,110 +17,118 @@ addpath(fullfile('rsatoolbox','Modules'));
 userOptions = BarebonesRSASetup('DEMO1');
 
 % Let's define the path to the Demo Data distributed with the RSA Toolbox.
-% The datasets we will be referencing involve 92 images, so let's just set
-% that number into a variable for consistency and ease of reference later.
 DemoDataDir = fullfile('rsatoolbox','Demos','92imageData');
-nitems = 92;
 
 %% LOAD DATA
 Metadata = LoadImageMetadata(DemoDataDir);
 
-Brain = LoadBrainData(DemoDataDir);
+[Brain,BrainBySubject] = LoadBrainData(DemoDataDir);
 showRDMs(Brain.RDMs,1);
+showRDMs(BrainBySubject.RDMs,2);
 
 Handmade = BuildHandmadeData(Metadata);
-showRDMs(Handmade.RDMs,2);
+showRDMs(Handmade.RDMs',3);
 
 [Behaviour,BehaviourBySubject] = LoadBehaviourData(DemoDataDir);
 disp(struct2table(BehaviourBySubject.RDMs));
-showRDMs(BehaviourBySubject.RDMs,3)
-showRDMs(Behaviour.RDMs,4)
+showRDMs(BehaviourBySubject.RDMs,4)
+showRDMs(Behaviour.RDMs,5)
 
 Model = LoadModelData(DemoDataDir);
-showRDMs(Model.RDMs',5);
+showRDMs(Model.RDMs',6);
 % Place the model RDMs in cells in order to pass them to
 % compareRefRDM2candRDMs as candidate RDMs
 ModelRDMs_cell = num2cell(Model.RDMs);
 
-%% activity pattern MDS
-categoryIs=[5 6 7 8];
-categoryCols=[0 0 0
-              0 0 0
-              0 0 0
-              0 0 0
-              1 0.5 0
-              1 0 0
-              0 1 0
-              0 0.5 1];
-          
-blankConditionLabels = cell(1, nitems);
-[blankConditionLabels{:}] = deal(' ');
+%% Set Cosmetic Options for Plotting
+userOptions.conditionColours = SetConditionColours(Metadata);
+userOptions.blankConditionLabels = cell(1, Metadata.nitems);
+[userOptions.blankConditionLabels{:}] = deal(' ');
 
-userOptions.conditionColours = [];
-userOptions.distanceMeasure = 'Spearman';
-userOptions.RDMcorrelationType = 'Kendall_taua';
-userOptions.conditionLabels = blankConditionLabels;
-for condI = 1:nitems
-    for catI = 1:numel(categoryIs)
-        if Metadata.categoryVectors(condI,categoryIs(catI))
-            userOptions.conditionColours(condI,:) = categoryCols(categoryIs(catI),:);
-        end
-    end
-end
-avgRDM = selectbyfield(brain.RDMs,'name','hITvisStim_316vx');
+%% Subject-averaged MDS
+avgRDM = selectbyfield(Brain.RDMs,'name','hIT');
 avgRDM.name = 'subject-averaged RDM';
 avgRDM.color = [0 0 0];
 
-
-%% subject-averaged MDS
-
 MDSConditions(avgRDM, userOptions,struct('titleString','subject-averaged MDS',...
-    'fileName','ssMDS', 'figureNumber',8));
-% subject-averaged Dendrogram
+    'fileName','ssMDS', 'figureNumber',7));
+
 dendrogramConditions(avgRDM, userOptions, struct( ...
     'titleString', 'Dendrogram of the subject-averaged RDM', ...
-    'useAlternativeConditionLabels', true, ...
-    'alternativeConditionLabels', ...
-    {blankConditionLabels}, ...
-    'figureNumber', 9));
+    'figureNumber', 8));
 
-%% one-subject MDS
-hIT_bySubjectAndSession.filename = fullfile(DemoDataDir,'92_brainRDMs.mat');
-VariablesToLoad = {
-    'RDMs'
-};
-hIT_bySubjectAndSession = load(hIT_bySubjectAndSession.filename,VariablesToLoad{:});
-hIT_bySubject.RDMs = averageRDMs_subjectSession(hIT_bySubjectAndSession.RDMs, 'session');
-
-singleSubjectRDM = hIT_bySubject.RDMs(1);
+%% One-subject MDS
+singleSubjectRDM = selectbyfield(BrainBySubject.RDMs,'name','hIT | BE');
 singleSubjectRDM.name = 'hIT-BE';
+
 MDSConditions(singleSubjectRDM, userOptions,struct('titleString','sample subject MDS',...
-    'fileName','single-subject RDM','figureNumber',10));
-% 
-% % one-subject Dendrogram
-% rsa.dendrogramConditions(rsa.rdm.wrapAndNameRDMs(subjectRDMs(:,:,3),{'single-subject RDM'}), userOptions,...
-% struct('titleString', 'Dendrogram of a single-subject RDM', 'useAlternativeConditionLabels', true, 'alternativeConditionLabels', {blankConditionLabels}, 'figureNumber', 11));
+    'fileName','single-subject RDM','figureNumber',9));
 
+%% Set 2nd Order Correlation metric
+% Picking the right metric is important! It is worth revisiting how each
+% correlation metric is computed.
+% Pearson
+% =======
+% A linear correlation metric. It is the covariance between two vectors,
+% normalized by the product of the standard deviation of those two vectors.
+% It is sensitive to the magnitude of the differences between vectors and
+% between vector elements.
+%
+% Spearman
+% ========
+% A nonlinear rank-correlation metric. Actually, it is the Pearson
+% correlation after rank-transforming the elements of each vector. It is
+% sensive to the order of vector elements, and larger discrepencies are
+% penalized more. It is useful when the variables you are comparing may be
+% on different scales.
+%
+% Kendall's Tau A
+% ===============
+% Recommended when any of the RDM's being compared to the reference RDM are
+% categorical. It is the proportion of pairs of values that are
+% consistently ordered in both variables. It is easiest to understand
+% Kendall's Tau with and example. Check out:
+%
+%     KendallTauExample.m
+%
+% In the paper published along with this RSA Toolbox, the authors discuss
+% these metrics a bit.
+%     https://doi.org/10.1371/journal.pcbi.1003553
 
+% With the concepts out of the way, it comes to actually expressing your
+% decision to the RSA Toolbox. Here... there is a bit of confusion. Both of
+% the following options actually do the same thing in different places.
+% This is the risk with using experimental, cutting-edge analyses. The code
+% is experimental and cutting-edge as well! (Which means there will be some
+% rough spots.) In this case, it looks like they they may be in the middle
+% of moving to a new set of keywords. ANYWAY. For now, it may be important to
+% set both if you are using anything other than 'Kendall_taua'.
+userOptions.RDMcorrelationType = 'Kendall_taua';
+userOptions.distanceMeasure = '';
 
 %% RDM correlation matrix and MDS
-% 2nd order correlation matrix
-userOptions.RDMcorrelationType='Kendall_taua';
-
-pairwiseCorrelateRDMs({avgRDM, models.RDMs}, userOptions, struct( ...
-    'figureNumber', 12, ...
+pairwiseCorrelateRDMs({avgRDM, Model.RDMs}, userOptions, struct( ...
+    'figureNumber', 11, ...
     'fileName','RDMcorrelationMatrix'));
 
-% 2nd order MDS
-MDSRDMs({avgRDM, models.RDMs}, userOptions, struct( ...
+MDSRDMs({avgRDM, Model.RDMs}, userOptions, struct( ...
     'titleString', 'MDS of different RDMs', ...
-    'figureNumber', 13, ...
+    'figureNumber', 12, ...
     'fileName','2ndOrderMDSplot'));
 
-
 %% Finally: the anaysis! (human IT RDM from Kriegeskorte et al. (Neuron 2008) as the reference RDM
-% userOptions.RDMcorrelationType='Kendall_taua';
+% One of the final figures is not displaying properly with conditions
+% lables! Oops. Let's strip them before we begin.
+for i = 1:numel(ModelRDMs_cell)
+    ModelRDMs_cell{i}.name = num2str(i);
+end
+% Because some of the reference RDMs are categorical, the prescription from
+% Nili et al. (PLoS Comp Biol 2013) is to use 'Kendall_taua'. However, it
+% should only inflate effects in the categorical cases if we use Spearman
+% instead (which runs *MUCH* faster). So, I've put Spearman in here. But
+% you are welcome to also try Kendall Tau A!
 userOptions.RDMcorrelationType='Spearman';
+% userOptions.RDMcorrelationType='Kendall_taua';
 
 userOptions.RDMrelatednessTest = 'randomisation';
 userOptions.RDMrelatednessThreshold = 0.05;
@@ -134,5 +142,5 @@ userOptions.candRDMdifferencesThreshold = 0.05;
 userOptions.candRDMdifferencesMultipleTesting = 'FDR';
 userOptions.figure1filename = 'compareRefRDM2candRDMs_barGraph_hITasRef';
 userOptions.figure2filename = 'compareRefRDM2candRDMs_pValues_hITasRef';
-userOptions.figureIndex = [16 17];
-stats_p_r=compareRefRDM2candRDMs(hIT_bySubject.RDMs, ModelRDMs_cell, userOptions);
+userOptions.figureIndex = [13 14];
+stats_p_r=compareRefRDM2candRDMs(BrainBySubject.RDMs, ModelRDMs_cell, userOptions);

@@ -7,7 +7,7 @@ function Model  = LoadModelData(DemoDataDir)
     };
     tmp = load(filename{1}, VariablesToLoad{:});
     Model.RDMs = reshape(tmp.Models([2,4,7,8]),4,1);
-
+    [Model.RDMs.color] = deal([0,0,0]);
 
     %% load RDMs for V1 model and HMAX model with natural image patches from Serre et al. (Computer Vision and Pattern Recognition 2005)
     filename{2} = fullfile(DemoDataDir,'rdm92_V1model.mat');

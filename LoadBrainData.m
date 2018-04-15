@@ -1,10 +1,12 @@
-function Brain = LoadBrainData(DemoDataDir)
-    %% load RDMs and category definitions from Kriegeskorte et al. (Neuron 2008)
-    filename = fullfile(DemoDataDir,'Kriegeskorte_Neuron2008_supplementalData.mat');
+function [Brain,bySubject] = LoadBrainData(DemoDataDir)
+    filename = fullfile(DemoDataDir,'92_brainRDMs.mat');
     VariablesToLoad = {
-        'RDMs_mIT_hIT_fig1'
+        'RDMs'
     };
-    tmp = load(filename, VariablesToLoad{:});
-    Brain.RDMs = tmp.RDMs_mIT_hIT_fig1;
+    tmp = load(filename,VariablesToLoad{:});
+    bySubject.RDMs = averageRDMs_subjectSession(tmp.RDMs, 'session');    
+    bySubject.filename = filename;
+
+    Brain.RDMs = averageRDMs_subjectSession(bySubject.RDMs, 'subject');
     Brain.filename = filename;
 end
