@@ -9,8 +9,11 @@
 %% SETUP
 % Add RSA Toolbox components to the path. This will allow matlab to find
 % the functions defined within the toolbox when we ask to use them.
-addpath(fullfile('rsatoolbox','Engines'));
-addpath(fullfile('rsatoolbox','Modules'));
+rootDir = pwd();
+addpath(fullfile(rootDir,'rsatoolbox','Engines'));
+addpath(fullfile(rootDir,'rsatoolbox','Modules'));
+addpath(fullfile(rootDir,'HelperFunctions'));
+addpath(fullfile(rootDir,'Patches'));
 
 % Some of the important Network RSA functions reference a unified set of
 % "User Options". This helper-function will get us started.
@@ -89,22 +92,21 @@ MDSConditions(singleSubjectRDM, userOptions,struct('titleString','sample subject
 % consistently ordered in both variables. It is easiest to understand
 % Kendall's Tau with and example. Check out:
 %
-%     KendallTauExample.m
+%     StatsExamples/KendallTauExample.m
 %
 % In the paper published along with this RSA Toolbox, the authors discuss
 % these metrics a bit.
 %     https://doi.org/10.1371/journal.pcbi.1003553
 
 % With the concepts out of the way, it comes to actually expressing your
-% decision to the RSA Toolbox. Here... there is a bit of confusion. Both of
-% the following options actually do the same thing in different places.
-% This is the risk with using experimental, cutting-edge analyses. The code
-% is experimental and cutting-edge as well! (Which means there will be some
-% rough spots.) In this case, it looks like they they may be in the middle
-% of moving to a new set of keywords. ANYWAY. For now, it may be important to
-% set both if you are using anything other than 'Kendall_taua'.
+% decision to the RSA Toolbox. Here... there is a bit of confusion. For a
+% full digression, run my notes function. For now, just note that
+% RDMcorrelationType and distanceMeasure are somewhat redundant, but it may
+% be it may be important to set both if you are using anything other than
+% 'Kendall_taua'.
 userOptions.RDMcorrelationType = 'Kendall_taua';
 userOptions.distanceMeasure = '';
+ReadChrisNotesAbout('userOptions.distanceMeasure');
 
 %% RDM correlation matrix and MDS
 pairwiseCorrelateRDMs({avgRDM, Model.RDMs}, userOptions, struct( ...
@@ -131,7 +133,7 @@ userOptions.RDMcorrelationType='Spearman';
 % userOptions.RDMcorrelationType='Kendall_taua';
 
 % The default test of relatedness is the (one-sided) Wilcoxon Signed Rank
-% Test. Check out WilcoxonDemo.m
+% Test. Check out StatsExamples/WilcoxonExample.m
 userOptions.RDMrelatednessTest = 'randomisation';
 userOptions.RDMrelatednessThreshold = 0.05;
 userOptions.RDMrelatednessMultipleTesting = 'none';%'FWE'

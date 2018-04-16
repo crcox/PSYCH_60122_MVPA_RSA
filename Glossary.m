@@ -31,5 +31,14 @@ disp(fullfile(rootdir,subdirectories));
 % Example:
 disp(pwd());
 
+% strjoin() is a programatic way to combine a bunch of substrings into one
+% long string. The substrings should be passed as a cell array. You are
+% also able to specify a "delimiter", which is just the string that will be
+% inserted between each of your substrings when building the big string.
+% It's generally a better approach than manual string combination methods.
+disp(strjoin({'a';'b';'c'},'_'));
+disp(strjoin({'a';'b';'c'},','));
+disp(strjoin({'a';'b';'c'},'_BRAINS_'));
+
 
 
