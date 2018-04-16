@@ -130,6 +130,8 @@ end
 userOptions.RDMcorrelationType='Spearman';
 % userOptions.RDMcorrelationType='Kendall_taua';
 
+% The default test of relatedness is the (one-sided) Wilcoxon Signed Rank
+% Test. Check out WilcoxonDemo.m
 userOptions.RDMrelatednessTest = 'randomisation';
 userOptions.RDMrelatednessThreshold = 0.05;
 userOptions.RDMrelatednessMultipleTesting = 'none';%'FWE'
