@@ -19,7 +19,7 @@ function [ p_ttest, p_signedrank] = TestAllVoxels( rMaps, SLMetadata )
                 for z=1:nz
                     if SLMetadata.mask(x,y,z) == 1
                         [~, p_ttest(x,y,z)] = ttest(squeeze(rMaps(x,y,z,:,modelI)),0,0.05,'right');
-                        [p_signedrank(x,y,z)] = signrank_onesided(squeeze(rMaps(x,y,z,:,modelI)));
+                        [p_signedrank(x,y,z)] = rsa.stat.signrank_onesided(squeeze(rMaps(x,y,z,:,modelI)));
                     end
                 end
             end

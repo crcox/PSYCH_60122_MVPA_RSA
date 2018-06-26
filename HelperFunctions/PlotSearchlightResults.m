@@ -21,7 +21,7 @@ function [p_fdr, p_bnf] = PlotSearchlightResults( pMap, StatType, SLMetadata, us
     
     % apply FDR correction
     disp(StatType);
-    p_fdr = FDRthreshold(pMap,0.05,SLMetadata.mask);
+    p_fdr = rsa.stat.FDRthreshold(pMap,0.05,SLMetadata.mask);
     p_bnf = 0.05/sum(SLMetadata.mask(:));
     % mark the suprathreshold voxels in yellow
     supraThreshMarked = zeros(size(pMap));
@@ -29,17 +29,17 @@ function [p_fdr, p_bnf] = PlotSearchlightResults( pMap, StatType, SLMetadata, us
 
     if p.Results.PlotSimulatedEffect
         % display the location where the effect was inserted (in green):
-        brainVol = addRoiToVol(map2vol(SLMetadata.anatVol),mask2roi(SLMetadata.mask),[1 0 0],2);
-        brainVol_effectLoc = addBinaryMapToVol(brainVol,SLMetadata.MaskFromSimulation.*SLMetadata.mask,[0 1 0]);
-        showVol(brainVol_effectLoc,'simulated effect [green]',p.Results.SimFigureNumber);
-        handleCurrentFigure(fullfile(userOptions.rootPath,'results_DEMO4_simulatedEffectRegion'),userOptions);
+        brainVol = rsa.fmri.addRoiToVol(rsa.util.map2vol(SLMetadata.anatVol),rsa.util.mask2roi(SLMetadata.mask),[1 0 0],2);
+        brainVol_effectLoc = rsa.fmri.addBinaryMapToVol(brainVol,SLMetadata.MaskFromSimulation.*SLMetadata.mask,[0 1 0]);
+        rsa.fig.showVol(brainVol_effectLoc,'simulated effect [green]',p.Results.SimFigureNumber);
+        rsa.fig.handleCurrentFigure(fullfile(userOptions.rootPath,'results_DEMO4_simulatedEffectRegion'),userOptions);
     end
 
     % display the FDR-thresholded maps on a sample anatomy
-    brainVol = addRoiToVol(map2vol(SLMetadata.anatVol),mask2roi(SLMetadata.mask),[1 0 0],2);
-    brainVol_t = addBinaryMapToVol(brainVol,supraThreshMarked.*SLMetadata.mask,[1 1 0]);
-    showVol(brainVol_t,figurelabel,p.Results.FigureNumber)
-    handleCurrentFigure(fullfile(userOptions.rootPath,filename),userOptions);
+    brainVol = rsa.fmri.addRoiToVol(rsa.util.map2vol(SLMetadata.anatVol),rsa.util.mask2roi(SLMetadata.mask),[1 0 0],2);
+    brainVol_t = rsa.fmri.addBinaryMapToVol(brainVol,supraThreshMarked.*SLMetadata.mask,[1 1 0]);
+    rsa.fig.showVol(brainVol_t,figurelabel,p.Results.FigureNumber)
+    rsa.fig.handleCurrentFigure(fullfile(userOptions.rootPath,filename),userOptions);
     fprintf('\n');
 end
 

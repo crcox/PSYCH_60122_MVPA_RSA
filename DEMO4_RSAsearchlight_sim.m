@@ -56,11 +56,11 @@ Nsubjects = 20;
 % I pre-ran all the data simulation and searchlights to save time. We'll
 % jump in at the point of having "information maps" that can be submitted
 % to statistical analysis.
-warpFlags.interp = 1;
-warpFlags.wrap = [0 0 0];
-warpFlags.vox = userOptions.voxelSize; % [3 3 3.75]
-warpFlags.bb = [-78 -112 -50; 78 76 85];
-warpFlags.preserve = 0;
+% warpFlags.interp = 1;
+% warpFlags.wrap = [0 0 0];
+% warpFlags.vox = userOptions.voxelSize; % [3 3 3.75]
+% warpFlags.bb = [-78 -112 -50; 78 76 85];
+% warpFlags.preserve = 0;
 
 % Set paths for output files that help document the analysis
 % ----------------------------------------------------------
@@ -104,6 +104,9 @@ userOptions.RDMname = 'referenceRDM';
 userOptions.plottingStyle = 2;
 
 %% simulate the data and compute the correlation maps per subject
+%
+% CHRIS ALREADY DID THIS.
+%
 % % Takes about 15 minutes to run ...
 % t = tic();
 % Models = constructModelRDMs(modelRDMs_SL_sim(), userOptions);
